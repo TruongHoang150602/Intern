@@ -1,16 +1,40 @@
 // slices/questionSlice.js
+import {
+  checkSufficientQuestions,
+  chooseOptionFuntion,
+  resetUserAnswer,
+  submitUserAnswer,
+} from "@/helpper/question";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-export const getAllQuestionsAPI = createAsyncThunk(
+export const getUserResultAPI = createAsyncThunk(
   "question/getQuestions",
-  async (testId) => {
+  async (testId, type) => {
     try {
-      console.log(testId);
-      const response = await axios.get(`http://localhost:3001/tests/${testId}`);
+      console.log(testId, type);
+      const response = await axios.get(
+        `http://localhost:3001/userResults/65641bc12971970f5e1918cc/${testId}/${type}`
+      );
       const data = response.data;
-      const questions = data.test.questions;
-      return questions;
+      if (!data) createNewUserResultAPI(testId, type);
+      return data;
+    } catch (error) {
+      throw new Error("Failed to fetch question data from API");
+    }
+  }
+);
+
+export const createNewUserResultAPI = createAsyncThunk(
+  "question/getQuestions",
+  async (testId, type) => {
+    try {
+      console.log(testId, type);
+      const response = await axios.post(
+        `http://localhost:3001/userResults/65641bc12971970f5e1918cc/${testId}/${type}`
+      );
+      const data = response.data;
+      return data;
     } catch (error) {
       throw new Error("Failed to fetch question data from API");
     }
@@ -20,9 +44,7 @@ export const getAllQuestionsAPI = createAsyncThunk(
 const questionSlice = createSlice({
   name: "question",
   initialState: {
-    questionList: [],
     userAnswer: [],
-    showAnswer: [],
     currentQuestion: null,
     numberQuestion: 0,
     type: 0,
@@ -41,38 +63,54 @@ const questionSlice = createSlice({
       state.isLoading = false;
       state.error = action.payload;
     },
-    nextQuestion(state) {
-      state.currentQuestion++;
-      if (state.currentQuestion == state.numberQuestion)
-        state.isOpenModal = true;
-    },
-
-    preQuestion(state) {
-      state.currentQuestion--;
-    },
 
     startGame(state) {
       state.currentQuestion = 0;
-      state.isSubmitted = false;
-      state.userAnswer = Array(state.questionList.length).fill([]);
     },
 
-    answerCorrect(state) {
+    restartGame(state, action) {
+      state.currentQuestion = 0;
+      resetUserAnswer(state.userAnswer);
+    },
+
+    calculateScore(state) {
       state.score++;
     },
 
-    chooseMutilOption(state, action) {
-      const answer = action.payload;
-      const index = state.userAnswer[state.currentQuestion].findIndex(
-        (element) => element.option == answer.option
-      );
-      if (index !== -1)
-        state.userAnswer[state.currentQuestion].splice(index, 1);
-      else state.userAnswer[state.currentQuestion].push(answer);
-    },
-
     chooseOption(state, action) {
-      state.userAnswer[state.currentQuestion] = action.payload;
+      const optionId = action.payload;
+      switch (state.userAnswer[state.currentQuestion].question_type) {
+        case "choice":
+          chooseOptionFuntion(
+            state.userAnswer[state.currentQuestion].options,
+            optionId
+          );
+          if (type == "practice")
+            state.userAnswer[state.currentQuestion].showAnswer = true;
+          break;
+        case "multiple_choice":
+          chooseOptionFuntion(
+            state.userAnswer[state.currentQuestion].answer.options,
+            optionId,
+            true
+          );
+          if (type == "practice")
+            state.userAnswer[state.currentQuestion].showAnswer =
+              checkSufficientQuestions(
+                state.userAnswer[state.currentQuestion].options
+              );
+          break;
+        case "multiple_answer":
+          chooseOptionFuntion(
+            state.userAnswer[state.currentQuestion].answer.options,
+            optionId,
+            true
+          );
+          break;
+        default:
+          break;
+      }
+      console.log(state.userAnswer[state.currentQuestion].answer.options);
     },
 
     chooseQuestion(state, action) {
@@ -80,16 +118,15 @@ const questionSlice = createSlice({
     },
 
     changeTab(state, action) {
-      state.type = action.payload;
-      state.currentQuestion = null;
-      state.isSubmitted = false;
-      state.userAnswer = Array(state.questionList.length).fill([]);
+      const { testId, type } = action.payload;
+      getUserResultAPI(testId, type);
     },
 
     submit(state, action) {
       state.isSubmitted = true;
       state.isOpenModal = false;
       state.currentQuestion = null;
+      submitUserAnswer(state.userAnswer);
     },
 
     submitQuestion(state, action) {
@@ -117,19 +154,34 @@ const questionSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(getAllQuestionsAPI.pending, (state) => {
+      .addCase(getUserResultAPI.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(getAllQuestionsAPI.fulfilled, (state, action) => {
+      .addCase(getUserResultAPI.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.questionList = action.payload;
-        state.numberQuestion = state.questionList.length;
-        state.userAnswer = Array(state.questionList.length).fill([]);
+        const userResult = action.payload;
+        state.userAnswer = userResult.answers;
+        state.numberQuestion = state.userAnswer.length;
       })
-      .addCase(getAllQuestionsAPI.rejected, (state, action) => {
+      .addCase(getUserResultAPI.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message;
+      })
+      .addCase(createNewUserResultAPI.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(createNewUserResultAPI.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const userResult = action.payload;
+        state.userAnswer = userResult.answers;
+        state.numberQuestion = state.userAnswer.length;
+        state.isSubmitted = userResult.isSubmitted;
+      })
+      .addCase(createNewUserResultAPI.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
       });
   },
 });
@@ -137,22 +189,18 @@ const questionSlice = createSlice({
 export const {
   openModal,
   closeModal,
-  nextQuestion,
-  preQuestion,
   changeTab,
   chooseQuestion,
-  answerCorrect,
+  calculateScore,
   startGame,
   submit,
   submitQuestion,
   chooseOption,
-  chooseMutilOption,
 } = questionSlice.actions;
 
-export const selectQuestionList = (state) => state.question.questionList;
 export const selectCurrentQuestion = (state) => state.question.currentQuestion;
 export const selectNumberQuestion = (state) => state.question.numberQuestion;
-export const selectChoicedAnswer = (state) => state.question.userAnswer;
+export const selectUserAnswer = (state) => state.question.userAnswer;
 export const selectScore = (state) => state.question.score;
 export const selectIsLoading = (state) => state.question.isLoading;
 export const selectError = (state) => state.question.error;

@@ -13,10 +13,12 @@ export default function Review(props) {
           <Typography variant="h6">Question {index + 1}:</Typography>
           <Typography mt={1}>{question.question}</Typography>
           <Options
-            options={question.options}
-            isChoiced={userAnswer[index]}
-            explanation={question.explanation}
-            isSubmitted={true}
+            options={questionList[currentQuestion].options}
+            answer={userAnswer[currentQuestion]}
+            explanation={questionList[currentQuestion].explanation}
+            isSubmitted={isSubmitted}
+            question_type={question_type}
+            type={type}
           />
         </Box>
       ))}

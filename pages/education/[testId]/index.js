@@ -15,6 +15,7 @@ import GlobalStyles from "@mui/material/GlobalStyles";
 import { useSelector, useDispatch } from "react-redux";
 import {
   changeTab,
+  chooseQuestion,
   getAllQuestionsAPI,
   getQuestionsAPI,
   nextQuestion,
@@ -103,11 +104,11 @@ export default function Page(props) {
   };
 
   const onClickNextBtn = () => {
-    dispatch(nextQuestion());
+    dispatch(chooseQuestion(currentQuestion++));
   };
 
   const onClickPreBtn = () => {
-    dispatch(preQuestion());
+    dispatch(chooseQuestion(currentQuestion--));
   };
 
   const onChangeTab = (event, type) => {
