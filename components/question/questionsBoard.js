@@ -24,8 +24,14 @@ export default function QuestionsBoard(props) {
     dispatch(startGame());
   };
 
-  const correct = userAnswer.every((element) => element.is_correct);
-
+  const checkCorrect = (options) => {
+    return options.every((option) => {
+      return (
+        (option.isSelected && option.option.is_correct) ||
+        (!option.isSelected && !option.option.is_correct)
+      );
+    });
+  };
   return (
     <Box
       sx={{
@@ -63,10 +69,10 @@ export default function QuestionsBoard(props) {
               <Button
                 className={`QuestionPalette ${
                   (currentQuestion == index && "currentQuestion") ||
-                  (showAnswer &&
-                    ((correct && "correctOptionBtn") ||
-                      (!correct && "wrongOptionBtn"))) ||
-                  (type == 1 && answer.length > 0 && "choosenQuestionBtn")
+                  (answer.showAnswer &&
+                    ((checkCorrect(answer.options) && "correctOptionBtn") ||
+                      (!checkCorrect(answer.options) && "wrongOptionBtn"))) ||
+                  (type == "test" && answer.length > 0 && "choosenQuestionBtn")
                 }`}
                 onClick={() => {
                   onClickQuestion(index);
@@ -91,7 +97,7 @@ export default function QuestionsBoard(props) {
               </Button>
             )) || (
               <Button
-                variant={(checkSelectedAll && "contained") || "outlined"}
+                variant="contained"
                 onClick={onClickSubmit}
                 sx={{ position: "absolute", bottom: "15px", right: "15px" }}
               >

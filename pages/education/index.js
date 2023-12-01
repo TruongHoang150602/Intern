@@ -20,7 +20,6 @@ export default function Page(props) {
     dispatch(getAllTestAPI());
   }, [dispatch]);
 
-  console.log(testList);
   return (
     <Container className="main" maxWidth="lg">
       <Grid container spacing={3}>

@@ -7,7 +7,7 @@ export const getAllTestAPI = createAsyncThunk("test/getTests", async () => {
     const response = await axios.get("http://localhost:3001/tests");
     const data = response.data;
     console.log(data);
-    return data.tests;
+    return data;
   } catch (error) {
     throw new Error("Failed to fetch test data from API");
   }

@@ -11,22 +11,15 @@ import {
 } from "@mui/material";
 import SVGIcon from "../SVGIcon";
 import { useDispatch } from "react-redux";
-import { answerCorrect, submitQuestion } from "@/redux/slices/question";
+import { submitQuestion } from "@/redux/slices/question";
 import { useState } from "react";
 
 export default function EnterAnswer(props) {
-  const {
-    options,
-    explanation,
-    currentQuestion,
-    userAnswer,
-    isSubmitted,
-    type,
-  } = props;
+  const { options, explanation, answer, showAnswer } = props;
   const {
     control,
     handleSubmit,
-    setValue, // Add the setValue function from useForm
+    setValue,
     formState: { errors },
   } = useForm();
   const dispatch = useDispatch();
@@ -36,8 +29,8 @@ export default function EnterAnswer(props) {
   };
 
   useEffect(() => {
-    setValue("answer", userAnswer[currentQuestion].option || "");
-  }, [currentQuestion, setValue]);
+    setValue("answer", answer.answer || "");
+  }, [answer, setValue]);
 
   const [show, setShow] = useState(true);
   const onClickShow = () => {
@@ -54,6 +47,7 @@ export default function EnterAnswer(props) {
             placeholder="Đáp án trả lời ..."
             name="answer"
             control={control}
+            disabled={showAnswer}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -68,20 +62,13 @@ export default function EnterAnswer(props) {
         </FormProvider>
       </Box>
 
-      {((type == 0 && userAnswer[currentQuestion].option != null) ||
-        isSubmitted) && (
+      {showAnswer && (
         <Box>
           <Button className="answerOptionBtn correctOptionBtn" disabled={true}>
             <SVGIcon src="correct.svg" sx={{ width: "12px", height: "12px" }} />
           </Button>
-          {options.map((option) => option.option_text + " ")}
-          <Box
-            className={`explanation ${
-              ((type == 0 && userAnswer[currentQuestion].option != null) ||
-                isSubmitted) &&
-              "show-explanation"
-            }`}
-          >
+          {options.map((option) => option.option.option_text + " ")}
+          <Box className={`explanation ${showAnswer && "show-explanation"}`}>
             <Button
               variant="text"
               sx={{

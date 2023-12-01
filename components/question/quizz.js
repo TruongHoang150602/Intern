@@ -7,7 +7,6 @@ import EnterAnswer from "./enter-answer";
 
 export default function Quizz(props) {
   const {
-    questionList,
     currentQuestion,
     userAnswer,
     isSubmitted,
@@ -15,7 +14,8 @@ export default function Quizz(props) {
     onClickPreBtn,
     type,
   } = props;
-  const question_type = questionList[currentQuestion].question_type;
+  const question = userAnswer[currentQuestion].question;
+  const question_type = question.question_type;
   return (
     <Box
       sx={{
@@ -26,22 +26,20 @@ export default function Quizz(props) {
         position: "relative",
       }}
     >
-      <Question question={questionList[currentQuestion].question} />
+      <Question question={question.question} />
       {(question_type == "input" && (
         <EnterAnswer
-          options={questionList[currentQuestion].options}
-          currentQuestion={currentQuestion}
-          userAnswer={userAnswer}
-          explanation={questionList[currentQuestion].explanation}
-          isSubmitted={isSubmitted}
-          type={type}
+          options={userAnswer[currentQuestion].options}
+          answer={userAnswer[currentQuestion]}
+          explanation={question.explanation}
+          showAnswer={userAnswer[currentQuestion].showAnswer}
         />
       )) || (
         <Options
-          options={questionList[currentQuestion].options}
+          options={userAnswer[currentQuestion].options}
           answer={userAnswer[currentQuestion]}
-          explanation={questionList[currentQuestion].explanation}
-          isSubmitted={isSubmitted}
+          explanation={question.explanation}
+          showAnswer={userAnswer[currentQuestion].showAnswer}
           question_type={question_type}
           type={type}
         />
@@ -62,7 +60,7 @@ export default function Quizz(props) {
         <Button
           className="moveQuestionBtn nextQuestionBtn"
           onClick={onClickNextBtn}
-          disabled={currentQuestion == questionList.length - 1}
+          disabled={currentQuestion == userAnswer.length - 1}
         >
           Next
           <SVGIcon

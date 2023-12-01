@@ -10,13 +10,15 @@ import axios from "axios";
 
 export const getUserResultAPI = createAsyncThunk(
   "question/getQuestions",
-  async (testId, type) => {
+  async (payload) => {
     try {
+      const { testId, type } = payload;
       console.log(testId, type);
       const response = await axios.get(
         `http://localhost:3001/userResults/65641bc12971970f5e1918cc/${testId}/${type}`
       );
       const data = response.data;
+      console.log(data);
       if (!data) createNewUserResultAPI(testId, type);
       return data;
     } catch (error) {
@@ -25,21 +27,18 @@ export const getUserResultAPI = createAsyncThunk(
   }
 );
 
-export const createNewUserResultAPI = createAsyncThunk(
-  "question/getQuestions",
-  async (testId, type) => {
-    try {
-      console.log(testId, type);
-      const response = await axios.post(
-        `http://localhost:3001/userResults/65641bc12971970f5e1918cc/${testId}/${type}`
-      );
-      const data = response.data;
-      return data;
-    } catch (error) {
-      throw new Error("Failed to fetch question data from API");
-    }
+export const createNewUserResultAPI = async (testId, type) => {
+  try {
+    console.log(testId, type);
+    const response = await axios.post(
+      `http://localhost:3001/userResults/65641bc12971970f5e1918cc/${testId}/${type}`
+    );
+    const data = response.data;
+    return data;
+  } catch (error) {
+    throw new Error("Failed to fetch question data from API");
   }
-);
+};
 
 const questionSlice = createSlice({
   name: "question",
@@ -47,7 +46,7 @@ const questionSlice = createSlice({
     userAnswer: [],
     currentQuestion: null,
     numberQuestion: 0,
-    type: 0,
+    type: "practice",
     score: 0,
     isLoading: false,
     error: null,
@@ -79,30 +78,33 @@ const questionSlice = createSlice({
 
     chooseOption(state, action) {
       const optionId = action.payload;
-      switch (state.userAnswer[state.currentQuestion].question_type) {
+      const currentQuestion = state.userAnswer[state.currentQuestion];
+
+      switch (currentQuestion.question.question_type) {
         case "choice":
-          chooseOptionFuntion(
-            state.userAnswer[state.currentQuestion].options,
+          currentQuestion.options = chooseOptionFuntion(
+            currentQuestion.options,
             optionId
           );
-          if (type == "practice")
-            state.userAnswer[state.currentQuestion].showAnswer = true;
+          if (state.type === "practice") {
+            currentQuestion.showAnswer = true;
+          }
           break;
         case "multiple_choice":
-          chooseOptionFuntion(
-            state.userAnswer[state.currentQuestion].answer.options,
+          currentQuestion.options = chooseOptionFuntion(
+            currentQuestion.options,
             optionId,
             true
           );
-          if (type == "practice")
-            state.userAnswer[state.currentQuestion].showAnswer =
-              checkSufficientQuestions(
-                state.userAnswer[state.currentQuestion].options
-              );
+          if (state.type === "practice") {
+            currentQuestion.showAnswer = checkSufficientQuestions(
+              currentQuestion.options
+            );
+          }
           break;
         case "multiple_answer":
-          chooseOptionFuntion(
-            state.userAnswer[state.currentQuestion].answer.options,
+          currentQuestion.options = chooseOptionFuntion(
+            currentQuestion.options,
             optionId,
             true
           );
@@ -110,7 +112,8 @@ const questionSlice = createSlice({
         default:
           break;
       }
-      console.log(state.userAnswer[state.currentQuestion].answer.options);
+
+      console.log(currentQuestion.options);
     },
 
     chooseQuestion(state, action) {
@@ -119,7 +122,8 @@ const questionSlice = createSlice({
 
     changeTab(state, action) {
       const { testId, type } = action.payload;
-      getUserResultAPI(testId, type);
+      state.type = type;
+      getUserResultAPI({ testId, type });
     },
 
     submit(state, action) {
@@ -130,17 +134,14 @@ const questionSlice = createSlice({
     },
 
     submitQuestion(state, action) {
-      const answer = action.payload.answer;
-      console.log(answer);
-      const check = state.questionList[state.currentQuestion].options.find(
-        (option) => option.option_text.toLowerCase() == answer.toLowerCase()
-      );
-      state.userAnswer[state.currentQuestion] = [
-        {
-          option: answer,
-          is_correct: check != undefined,
-        },
-      ];
+      const currentQuestion = state.userAnswer[state.currentQuestion];
+      if (currentQuestion.question.question_type == "input") {
+        const answer = action.payload;
+        console.log(answer);
+        state.userAnswer[state.currentQuestion].answer = answer.answer;
+      }
+      if (state.type == "practice")
+        state.userAnswer[state.currentQuestion].showAnswer = true;
     },
 
     openModal(state, action) {
@@ -161,28 +162,29 @@ const questionSlice = createSlice({
       .addCase(getUserResultAPI.fulfilled, (state, action) => {
         state.isLoading = false;
         const userResult = action.payload;
+        console.log(userResult);
         state.userAnswer = userResult.answers;
         state.numberQuestion = state.userAnswer.length;
       })
       .addCase(getUserResultAPI.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message;
-      })
-      .addCase(createNewUserResultAPI.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(createNewUserResultAPI.fulfilled, (state, action) => {
-        state.isLoading = false;
-        const userResult = action.payload;
-        state.userAnswer = userResult.answers;
-        state.numberQuestion = state.userAnswer.length;
-        state.isSubmitted = userResult.isSubmitted;
-      })
-      .addCase(createNewUserResultAPI.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
       });
+    // .addCase(createNewUserResultAPI.pending, (state) => {
+    //   state.isLoading = true;
+    //   state.error = null;
+    // })
+    // .addCase(createNewUserResultAPI.fulfilled, (state, action) => {
+    //   state.isLoading = false;
+    //   const userResult = action.payload;
+    //   state.userAnswer = userResult.answers;
+    //   state.numberQuestion = state.userAnswer.length;
+    //   state.isSubmitted = userResult.isSubmitted;
+    // })
+    // .addCase(createNewUserResultAPI.pending, (state) => {
+    //   state.isLoading = true;
+    //   state.error = null;
+    // });
   },
 });
 

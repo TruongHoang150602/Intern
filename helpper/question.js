@@ -1,11 +1,12 @@
-export const chooseOptionFuntion = (options, optionId, mutilOption = false) => {
-  for (let i = 0; i < options.length; i++) {
-    if (options[i]._id === optionId) {
-      options[i].isSelected = !options[i].isSelected;
-    } else if (!mutilOption) {
-      options[i].isSelected = false;
+export const chooseOptionFuntion = (options, optionId, multiOption = false) => {
+  options.forEach((option) => {
+    if (option.option._id == optionId) {
+      option.isSelected = !option.isSelected;
+    } else if (!multiOption) {
+      option.isSelected = false;
     }
-  }
+  });
+  return options;
 };
 
 export const checkSufficientQuestions = (options) => {

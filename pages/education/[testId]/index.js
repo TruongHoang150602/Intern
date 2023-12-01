@@ -16,20 +16,15 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   changeTab,
   chooseQuestion,
-  getAllQuestionsAPI,
-  getQuestionsAPI,
-  nextQuestion,
-  preQuestion,
-  selectChoicedAnswer,
+  getUserResultAPI,
   selectCurrentQuestion,
   selectError,
   selectIsLoading,
   selectIsOpenModal,
   selectIsSubmitted,
-  selectNumberQuestion,
-  selectQuestionList,
   selectScore,
   selectType,
+  selectUserAnswer,
   startGame,
 } from "@/redux/slices/question";
 import ConfirmSubmitModal from "@/components/question/confirmSubmitModal";
@@ -46,7 +41,6 @@ import QuestionsBoard from "@/components/question/questionsBoard";
 import Review from "@/components/question/review";
 import Result from "@/components/question/result";
 import { useRouter } from "next/router";
-import test from "@/redux/slices/test";
 
 const defaultTheme = createTheme();
 
@@ -55,10 +49,8 @@ export default function Page(props) {
   const { query } = useRouter();
   const { testId } = query;
 
-  const questionList = useSelector(selectQuestionList);
+  const userAnswer = useSelector(selectUserAnswer);
   const currentQuestion = useSelector(selectCurrentQuestion);
-  const numberQuestion = useSelector(selectNumberQuestion);
-  const userAnswer = useSelector(selectChoicedAnswer);
   const isLoading = useSelector(selectIsLoading);
   const open = useSelector(selectIsOpenModal);
   const isSubmitted = useSelector(selectIsSubmitted);
@@ -66,16 +58,14 @@ export default function Page(props) {
   const score = useSelector(selectScore);
   const type = useSelector(selectType);
 
-  const userList = useSelector(selectUserList);
-  const isOpenDrawer = useSelector(selectIsOpenDrawer);
+  // const userList = useSelector(selectUserList);
+  // const isOpenDrawer = useSelector(selectIsOpenDrawer);
 
   useEffect(() => {
-    dispatch(getAllQuestionsAPI(testId));
+    dispatch(getUserResultAPI({ testId, type }));
   }, [dispatch]);
 
-  // useEffect(() => {
-  //   dispatch(getUsersAPI());
-  // }, [dispatch]);
+  console.log(userAnswer);
 
   if (isLoading) {
     return (
@@ -104,15 +94,16 @@ export default function Page(props) {
   };
 
   const onClickNextBtn = () => {
-    dispatch(chooseQuestion(currentQuestion++));
+    dispatch(chooseQuestion(currentQuestion + 1));
   };
 
   const onClickPreBtn = () => {
-    dispatch(chooseQuestion(currentQuestion--));
+    dispatch(chooseQuestion(currentQuestion - 1));
   };
 
   const onChangeTab = (event, type) => {
-    dispatch(changeTab(type));
+    console.log(type);
+    dispatch(changeTab({ testId, type }));
   };
 
   return (
@@ -128,8 +119,8 @@ export default function Page(props) {
           onChange={onChangeTab}
           sx={{ background: "#F8F8FA", padding: "10px", borderRadius: "15px" }}
         >
-          <Tab value={0} label="Practice" />
-          <Tab value={1} label="Test" />
+          <Tab value="practice" label="Practice" />
+          <Tab value="test" label="Test" />
         </Tabs>
         <Grid container spacing={2} mt={4}>
           <Grid item xs={6} md={3}>
@@ -166,7 +157,6 @@ export default function Page(props) {
                 )) ||
                 (currentQuestion != null && (
                   <Quizz
-                    questionList={questionList}
                     currentQuestion={currentQuestion}
                     userAnswer={userAnswer}
                     isSubmitted={isSubmitted}
@@ -175,19 +165,17 @@ export default function Page(props) {
                     type={type}
                   />
                 ))}
-              {isSubmitted && (
-                <Review questionList={questionList} userAnswer={userAnswer} />
-              )}
+              {isSubmitted && <Review userAnswer={userAnswer} />}
             </Stack>
           </Grid>
         </Grid>
       </Container>
       <ConfirmSubmitModal open={open} score={score} />
-      <DrawerRanking
+      {/* <DrawerRanking
         open={isOpenDrawer}
         userList={userList}
         handleClose={handleCloseDrawer}
-      />
+      /> */}
     </ThemeProvider>
   );
 }

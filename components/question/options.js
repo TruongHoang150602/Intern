@@ -1,20 +1,15 @@
 import React, { useState } from "react";
-import {
-  Stack,
-  Button,
-  Grid,
-  Typography,
-  Divider,
-  Box,
-  ToggleButtonGroup,
-  ToggleButton,
-} from "@mui/material";
+import { Stack, Button, Grid, Typography, Divider, Box } from "@mui/material";
 import { useDispatch } from "react-redux";
 import SVGIcon from "../SVGIcon";
-import { chooseMutilOption, chooseOption } from "@/redux/slices/question";
+import {
+  chooseMutilOption,
+  chooseOption,
+  submitQuestion,
+} from "@/redux/slices/question";
 
 export default function Options(props) {
-  const { options, answer, explanation, isSubmitted, type, question_type } =
+  const { options, answer, explanation, showAnswer, question_type, type } =
     props;
   const dispatch = useDispatch();
 
@@ -23,38 +18,13 @@ export default function Options(props) {
     setShow(!show);
   };
 
-  const onClickOption = (id, is_correct) => {
-    if (question_type == "choice")
-      dispatch(chooseOption([{ option: id, is_correct }]));
-    else dispatch(chooseMutilOption({ option: id, is_correct }));
+  const onClickOption = (id) => {
+    dispatch(chooseOption(id));
   };
 
-  // let checkSelected = false;
-  // switch (question_type) {
-  //   case "choice":
-  //   case "multiple_choice":
-  //     checkSelected = answer
-  //     break;
-
-  //   default:
-  //     break;
-  // }
-
-  const checkSelectedOption = (id) => {
-    const index = answer
-      ? answer.findIndex((element) => element.option == id)
-      : -1;
-    return index !== -1;
+  const onClickSubmitQuestion = () => {
+    dispatch(submitQuestion());
   };
-
-  const checkSelectedAll = () => {
-    if (question_type == "multiple_answer") return false;
-    return (
-      options.filter((element) => element.is_correct).length == answer.length
-    );
-  };
-
-  const showAnswer = (type == 0 && checkSelectedAll()) || isSubmitted;
 
   return (
     <Stack spacing={2} sx={{ padding: 3 }}>
@@ -64,29 +34,27 @@ export default function Options(props) {
             <Grid item>
               <Button
                 className={`answerOptionBtn ${
-                  (!showAnswer &&
-                    checkSelectedOption(option._id) &&
-                    "choosenOptionBtn") ||
-                  (showAnswer && option.is_correct && "correctOptionBtn") ||
-                  (checkSelectedOption(option._id) &&
-                    !option.is_correct &&
+                  (!showAnswer && option.isSelected && "choosenOptionBtn") ||
+                  (showAnswer &&
+                    option.option.is_correct &&
+                    "correctOptionBtn") ||
+                  (option.isSelected &&
+                    !option.option.is_correct &&
                     "wrongOptionBtn")
                 }`}
                 value={option._id}
                 onClick={() => {
-                  onClickOption(option._id, option.is_correct);
+                  onClickOption(option.option._id);
                 }}
                 disabled={showAnswer}
               >
                 <SVGIcon
                   src={
-                    (!showAnswer &&
-                      checkSelectedOption(option._id) &&
-                      "/icon/choose.svg") ||
+                    (!showAnswer && option.isSelected && "/icon/choose.svg") ||
                     (showAnswer &&
-                      ((option.is_correct && "/icon/correct.svg") ||
-                        (checkSelectedOption(option._id) &&
-                          !option.is_correct &&
+                      ((option.option.is_correct && "/icon/correct.svg") ||
+                        (option.isSelected &&
+                          !option.option.is_correct &&
                           "/icon/wrong.svg")))
                   }
                   sx={{ width: "12px", height: "12px" }}
@@ -104,13 +72,13 @@ export default function Options(props) {
                   textAlign: "left",
                 }}
               >
-                {option.option_text}
+                {option.option.option_text}
               </Typography>
             </Grid>
           </Grid>
           <Box
             className={`explanation ${
-              showAnswer && option.is_correct && "show-explanation"
+              showAnswer && option.option.is_correct && "show-explanation"
             }`}
           >
             <Button
@@ -143,9 +111,13 @@ export default function Options(props) {
           </Box>
         </Box>
       ))}
-      {question_type == "multiple_answer" && type == 0 && (
+      {question_type == "multiple_answer" && type == "practice" && (
         <Box>
-          <Button variant={answer.length > 0 ? "contained" : "outlined"}>
+          <Button
+            variant={answer.length > 0 ? "contained" : "outlined"}
+            disabled={showAnswer}
+            onClick={onClickSubmitQuestion}
+          >
             Submit
           </Button>
         </Box>
