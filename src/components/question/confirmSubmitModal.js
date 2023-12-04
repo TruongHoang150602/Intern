@@ -7,12 +7,8 @@ import {
   Button,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  closeModal,
-  selectIsOpenModal,
-  submit,
-} from "../../redux/slices/question";
-import { createUserAPI } from "../../redux/slices/user";
+import { closeModal, submit } from "../../redux/slices/question";
+
 export default function ConfirmSubmitModal(props) {
   const { open, score } = props;
   const dispatch = useDispatch();

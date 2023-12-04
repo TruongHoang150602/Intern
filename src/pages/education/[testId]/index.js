@@ -16,6 +16,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   changeTab,
   chooseQuestion,
+  createNewUserResultAPI,
   getUserResultAPI,
   selectCurrentQuestion,
   selectError,
@@ -65,8 +66,6 @@ export default function Page(props) {
     dispatch(getUserResultAPI({ testId, type }));
   }, [dispatch]);
 
-  console.log(userAnswer);
-
   if (isLoading) {
     return (
       <Container
@@ -102,8 +101,14 @@ export default function Page(props) {
   };
 
   const onChangeTab = (event, type) => {
-    console.log(type);
     dispatch(changeTab({ testId, type }));
+    dispatch(getUserResultAPI({ testId, type }));
+  };
+
+  const onClickTryAgain = () => {
+    console.log("onclick");
+    dispatch(createNewUserResultAPI({ testId, type }));
+    dispatch(startGame());
   };
 
   return (
@@ -135,7 +140,7 @@ export default function Page(props) {
           <Grid item xs={6} md={9}>
             <Stack spacing={2}>
               {(isSubmitted && currentQuestion == null && (
-                <Result userAnswer={userAnswer} />
+                <Result userAnswer={userAnswer} testId={testId} type={type} />
               )) ||
                 (!isSubmitted && currentQuestion == null && (
                   <Box

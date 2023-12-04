@@ -1,10 +1,16 @@
-import { chooseQuestion, startGame } from "@/redux/slices/question";
+import {
+  chooseQuestion,
+  createNewUserResultAPI,
+  restartGame,
+  startGame,
+} from "@/redux/slices/question";
 import { Box, Button, Grid, Stack, Typography } from "@mui/material";
 import Image from "next/image";
 import { useDispatch } from "react-redux";
 
 export default function Result(props) {
-  const { userAnswer } = props;
+  const { userAnswer, testId, type } = props;
+  console.log(testId, type);
   const dispatch = useDispatch();
 
   const total = userAnswer.length;
@@ -15,9 +21,12 @@ export default function Result(props) {
   const incorrect = total - correct;
   const isPass = correct / total > 0.3;
 
-  const onClickTryAgain = () => {
+  const onClickRestart = (testId, type) => {
+    console.log("Restart: ", testId, type);
+    dispatch(createNewUserResultAPI({ testId, type }));
     dispatch(startGame());
   };
+
   const onClickReview = () => {
     dispatch(chooseQuestion(0));
   };
@@ -44,7 +53,7 @@ export default function Result(props) {
           <Button
             variant="outlined"
             sx={{ width: "180px", height: "40px", borderRadius: "50px" }}
-            onClick={onClickTryAgain}
+            onClick={() => onClickRestart(testId, type)}
           >
             TRY AGAIN
           </Button>

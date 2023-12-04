@@ -29,7 +29,7 @@ export const resetOption = (options) => {
 
 export const resetUserAnswer = (userAnswer) => {
   userAnswer.forEach((answer) => {
-    answer.answers = null;
+    answer.answer = null;
     answer.showAnswer = false;
     resetOption(answer.options);
   });
@@ -40,3 +40,5 @@ export const submitUserAnswer = (userAnswer) => {
     answer.showAnswer = true;
   });
 };
+
+export const calculateScore = (userAnswer) => {};

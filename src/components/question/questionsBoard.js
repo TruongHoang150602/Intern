@@ -1,6 +1,7 @@
 import {
   chooseQuestion,
   openModal,
+  restartGame,
   startGame,
   submit,
 } from "@/redux/slices/question";
@@ -21,11 +22,19 @@ export default function QuestionsBoard(props) {
   };
 
   const onClickRestart = () => {
-    dispatch(startGame());
+    dispatch(restartGame());
   };
 
-  const checkCorrect = (options) => {
-    return options.every((option) => {
+  const checkCorrect = (answer) => {
+    if (answer.question.question_type == "input") {
+      if (!answer.answer) return false;
+      return (
+        answer.options[0].option.option_text.toLowerCase() ==
+        answer.answer.toLowerCase()
+      );
+    }
+
+    return answer.options.every((option) => {
       return (
         (option.isSelected && option.option.is_correct) ||
         (!option.isSelected && !option.option.is_correct)
@@ -70,8 +79,8 @@ export default function QuestionsBoard(props) {
                 className={`QuestionPalette ${
                   (currentQuestion == index && "currentQuestion") ||
                   (answer.showAnswer &&
-                    ((checkCorrect(answer.options) && "correctOptionBtn") ||
-                      (!checkCorrect(answer.options) && "wrongOptionBtn"))) ||
+                    ((checkCorrect(answer) && "correctOptionBtn") ||
+                      (!checkCorrect(answer) && "wrongOptionBtn"))) ||
                   (type == "test" && answer.length > 0 && "choosenQuestionBtn")
                 }`}
                 onClick={() => {
@@ -86,7 +95,7 @@ export default function QuestionsBoard(props) {
 
           {currentQuestion != null &&
             !isSubmitted &&
-            ((type == 0 && (
+            ((type == "practice" && (
               <Button
                 variant="outlined"
                 onClick={onClickRestart}

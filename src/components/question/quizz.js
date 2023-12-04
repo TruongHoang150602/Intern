@@ -6,14 +6,8 @@ import { Box } from "@mui/material";
 import EnterAnswer from "./enter-answer";
 
 export default function Quizz(props) {
-  const {
-    currentQuestion,
-    userAnswer,
-    isSubmitted,
-    onClickNextBtn,
-    onClickPreBtn,
-    type,
-  } = props;
+  const { currentQuestion, userAnswer, onClickNextBtn, onClickPreBtn, type } =
+    props;
   const question = userAnswer[currentQuestion].question;
   const question_type = question.question_type;
   return (
