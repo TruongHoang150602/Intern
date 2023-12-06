@@ -11,7 +11,7 @@ import {
   getBlogsAPI,
   openModal,
   selectIsOpenModal,
-} from "../../redux/slices/blog";
+} from "../../redux/reducer/blog";
 import EditBlogModal from "../../components/blog/EditBlogModal";
 import { Button } from "@mui/material";
 

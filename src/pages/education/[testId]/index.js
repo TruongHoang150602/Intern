@@ -36,7 +36,7 @@ import {
   openDrawer,
   selectIsOpenDrawer,
   selectUserList,
-} from "../../../redux/slices/user";
+} from "../../../redux/reducer/user";
 import Quizz from "@/components/question/quizz";
 import QuestionsBoard from "@/components/question/questionsBoard";
 import Review from "@/components/question/review";

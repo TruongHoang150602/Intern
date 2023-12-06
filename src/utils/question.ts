@@ -1,6 +1,12 @@
-export const chooseOptionFuntion = (options, optionId, multiOption = false) => {
+import { Answer, Option } from "types/question";
+
+export const chooseOptionFuntion = (
+  options: Option[],
+  optionId: string,
+  multiOption = false
+) => {
   options.forEach((option) => {
-    if (option.option._id == optionId) {
+    if (option._id == optionId) {
       option.isSelected = !option.isSelected;
     } else if (!multiOption) {
       option.isSelected = false;
@@ -9,9 +15,9 @@ export const chooseOptionFuntion = (options, optionId, multiOption = false) => {
   return options;
 };
 
-export const checkSufficientQuestions = (options) => {
+export const checkSufficientQuestions = (options: Option[]) => {
   const requiredCount = options.reduce(
-    (count, option) => count + (option.option.is_correct ? 1 : 0),
+    (count, option) => count + (option.is_correct ? 1 : 0),
     0
   );
   const selectedCount = options.reduce(
@@ -21,13 +27,13 @@ export const checkSufficientQuestions = (options) => {
   return requiredCount === selectedCount;
 };
 
-export const resetOption = (options) => {
+export const resetOption = (options: Option[]) => {
   options.forEach((option) => {
     option.isSelected = false;
   });
 };
 
-export const resetUserAnswer = (userAnswer) => {
+export const resetUserAnswer = (userAnswer: Answer[]) => {
   userAnswer.forEach((answer) => {
     answer.answer = null;
     answer.showAnswer = false;
@@ -35,10 +41,10 @@ export const resetUserAnswer = (userAnswer) => {
   });
 };
 
-export const submitUserAnswer = (userAnswer) => {
+export const submitUserAnswer = (userAnswer: Answer[]) => {
   userAnswer.forEach((answer) => {
     answer.showAnswer = true;
   });
 };
 
-export const calculateScore = (userAnswer) => {};
+export const calculateScore = (userAnswer: Answer[]) => {};
