@@ -1,14 +1,23 @@
 import {
   chooseQuestion,
-  createNewUserResultAPI,
   restartGame,
   startGame,
-} from "@/redux/slices/question";
+} from "redux/reducer/question/question";
 import { Box, Button, Grid, Stack, Typography } from "@mui/material";
 import Image from "next/image";
 import { useDispatch } from "react-redux";
+import { Answer } from "types/question";
+import { checkCorrect } from "utils/question";
+import { createNewUserResultAPI } from "redux/reducer/question/userResultAPI";
+import { AnyAction, ThunkDispatch } from "@reduxjs/toolkit";
 
-export default function Result(props) {
+interface ResultProps {
+  userAnswer: Answer[], 
+  testId : string, 
+  type: "practice" | "test"
+}
+
+export default function Result(props: ResultProps) {
   const { userAnswer, testId, type } = props;
   console.log(testId, type);
   const dispatch = useDispatch();
@@ -16,14 +25,14 @@ export default function Result(props) {
   const total = userAnswer.length;
   let correct = 0;
   userAnswer.forEach((element) => {
-    if (element.is_correct) correct++;
+    if (checkCorrect(element)) correct++;
   });
   const incorrect = total - correct;
   const isPass = correct / total > 0.3;
 
-  const onClickRestart = (testId, type) => {
+  const onClickRestart = (testId: string, type: "practice" | "test") => {
     console.log("Restart: ", testId, type);
-    dispatch(createNewUserResultAPI({ testId, type }));
+    (dispatch as ThunkDispatch<any, void, AnyAction>)(createNewUserResultAPI({ userId: "65641bc12971970f5e1918cc", testId, type }));
     dispatch(startGame());
   };
 
@@ -45,6 +54,7 @@ export default function Result(props) {
         </Typography>
         <Image
           src={(isPass && "/image/pass.png") || "/image/fail.png"}
+          alt=""
           width={315}
           height={200}
         />

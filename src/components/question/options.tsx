@@ -3,12 +3,21 @@ import { Stack, Button, Grid, Typography, Divider, Box } from "@mui/material";
 import { useDispatch } from "react-redux";
 import SVGIcon from "../SVGIcon";
 import {
-  chooseMutilOption,
   chooseOption,
   submitQuestion,
-} from "@/redux/slices/question";
+} from "redux/reducer/question/question";
+import { Answer, Option } from "types/question";
 
-export default function Options(props) {
+interface OptionProps {
+  options: Option[]; 
+  explanation: string | null; 
+  answer: Answer;
+  showAnswer: boolean;
+  question_type: string,
+  type: string
+}
+
+export default function Options(props: OptionProps) {
   const { options, answer, explanation, showAnswer, question_type, type } =
     props;
   const dispatch = useDispatch();
@@ -18,12 +27,27 @@ export default function Options(props) {
     setShow(!show);
   };
 
-  const onClickOption = (id) => {
+  const onClickOption = (id: string) => {
     dispatch(chooseOption(id));
   };
 
   const onClickSubmitQuestion = () => {
-    dispatch(submitQuestion());
+    dispatch(submitQuestion(""));
+  };
+
+  const getIconSrc = (option: Option) => {
+    if (!showAnswer && option.isSelected) {
+      return "/icon/choose.svg";
+    } else if (showAnswer) {
+      if (option.is_correct) {
+        return "/icon/correct.svg";
+      } else if (option.isSelected && !option.is_correct) {
+        return "/icon/wrong.svg";
+      }
+    }
+  
+    // Nếu không phù hợp với bất kỳ điều kiện nào, trả về một giá trị mặc định hoặc rỗng tùy vào trường hợp của bạn.
+    return "";
   };
 
   return (
@@ -36,27 +60,20 @@ export default function Options(props) {
                 className={`answerOptionBtn ${
                   (!showAnswer && option.isSelected && "choosenOptionBtn") ||
                   (showAnswer &&
-                    option.option.is_correct &&
+                    option.is_correct &&
                     "correctOptionBtn") ||
                   (option.isSelected &&
-                    !option.option.is_correct &&
+                    !option.is_correct &&
                     "wrongOptionBtn")
                 }`}
                 value={option._id}
                 onClick={() => {
-                  onClickOption(option.option._id);
+                  onClickOption(option._id);
                 }}
                 disabled={showAnswer}
               >
                 <SVGIcon
-                  src={
-                    (!showAnswer && option.isSelected && "/icon/choose.svg") ||
-                    (showAnswer &&
-                      ((option.option.is_correct && "/icon/correct.svg") ||
-                        (option.isSelected &&
-                          !option.option.is_correct &&
-                          "/icon/wrong.svg")))
-                  }
+                  src={getIconSrc(option)}
                   sx={{ width: "12px", height: "12px" }}
                 />
               </Button>
@@ -72,13 +89,13 @@ export default function Options(props) {
                   textAlign: "left",
                 }}
               >
-                {option.option.option_text}
+                {option.option_text}
               </Typography>
             </Grid>
           </Grid>
           <Box
             className={`explanation ${
-              showAnswer && option.option.is_correct && "show-explanation"
+              showAnswer && option.is_correct && "show-explanation"
             }`}
           >
             <Button
@@ -114,7 +131,7 @@ export default function Options(props) {
       {question_type == "multiple_answer" && type == "practice" && (
         <Box>
           <Button
-            variant={answer.length > 0 ? "contained" : "outlined"}
+            variant="outlined"
             disabled={showAnswer}
             onClick={onClickSubmitQuestion}
           >

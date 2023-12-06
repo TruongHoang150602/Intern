@@ -4,8 +4,18 @@ import Options from "./options";
 import SVGIcon from "../SVGIcon";
 import { Box } from "@mui/material";
 import EnterAnswer from "./enter-answer";
+import { Answer } from "types/question";
 
-export default function Quizz(props) {
+
+interface QuestionsBoardProps {
+  currentQuestion: number, 
+  userAnswer : Answer[], 
+  onClickNextBtn: Function, 
+  onClickPreBtn: Function, 
+  type: string,
+}
+
+export default function Quizz(props: QuestionsBoardProps) {
   const { currentQuestion, userAnswer, onClickNextBtn, onClickPreBtn, type } =
     props;
   const question = userAnswer[currentQuestion].question;
@@ -24,7 +34,7 @@ export default function Quizz(props) {
       {(question_type == "input" && (
         <EnterAnswer
           options={userAnswer[currentQuestion].options}
-          answer={userAnswer[currentQuestion]}
+          answer={userAnswer[currentQuestion].answer}
           explanation={question.explanation}
           showAnswer={userAnswer[currentQuestion].showAnswer}
         />
@@ -42,7 +52,7 @@ export default function Quizz(props) {
       <Box sx={{ position: "absolute", bottom: "30px", left: "60px" }}>
         <Button
           className="moveQuestionBtn"
-          onClick={onClickPreBtn}
+          onClick={() => onClickPreBtn}
           disabled={currentQuestion == 0}
         >
           <SVGIcon
@@ -53,7 +63,7 @@ export default function Quizz(props) {
         </Button>
         <Button
           className="moveQuestionBtn nextQuestionBtn"
-          onClick={onClickNextBtn}
+          onClick={() => onClickNextBtn}
           disabled={currentQuestion == userAnswer.length - 1}
         >
           Next

@@ -48,3 +48,19 @@ export const submitUserAnswer = (userAnswer: Answer[]) => {
 };
 
 export const calculateScore = (userAnswer: Answer[]) => {};
+
+export const checkCorrect = (answer: Answer) => {
+  if (answer.question.question_type == "input") {
+    if (!answer.answer) return false;
+    return (
+      answer.options[0].option_text.toLowerCase() == answer.answer.toLowerCase()
+    );
+  }
+
+  return answer.options.every((option) => {
+    return (
+      (option.isSelected && option.is_correct) ||
+      (!option.isSelected && !option.is_correct)
+    );
+  });
+};

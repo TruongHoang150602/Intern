@@ -1,14 +1,13 @@
+import React from "react";
 import PropTypes from "prop-types";
-import { Box } from "@mui/material";
+import { Box, SxProps } from "@mui/system";
 
-// ----------------------------------------------------------------------
+interface SVGIconProps {
+  src: string;
+  sx?: SxProps;
+}
 
-SVGIcon.propTypes = {
-  src: PropTypes.string.isRequired,
-  sx: PropTypes.object,
-};
-
-export default function SVGIcon({ src, sx }) {
+const SVGIcon: React.FC<SVGIconProps> = ({ src, sx }) => {
   return (
     <Box
       component="span"
@@ -23,4 +22,6 @@ export default function SVGIcon({ src, sx }) {
       }}
     />
   );
-}
+};
+
+export default SVGIcon;

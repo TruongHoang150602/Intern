@@ -45,7 +45,7 @@ export interface QuestionState {
   type: "practice" | "test";
   score: number;
   isLoading: boolean;
-  error: string | null;
+  error: string | undefined;
   isSubmitted: boolean;
   isOpenModal: boolean;
 }

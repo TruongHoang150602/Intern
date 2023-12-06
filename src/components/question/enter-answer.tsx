@@ -1,6 +1,5 @@
-import { useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
-import { FormProvider, RHFTextField } from "../react-hook-form";
+import React, { useEffect, useState } from "react";
+import { useForm, FormProvider as RHFProvider, UseFormReturn } from "react-hook-form";
 import {
   Box,
   Button,
@@ -11,10 +10,18 @@ import {
 } from "@mui/material";
 import SVGIcon from "../SVGIcon";
 import { useDispatch } from "react-redux";
-import { submitQuestion } from "@/redux/slices/question";
-import { useState } from "react";
+import { submitQuestion } from "redux/reducer/question/question";
+import { RHFTextField } from "../react-hook-form";
+import { Option } from "types/question";
 
-export default function EnterAnswer(props) {
+interface EnterAnswerProps {
+  options: Option[]; 
+  explanation: string | null; 
+  answer: string | null
+  showAnswer: boolean;
+}
+
+export default function EnterAnswer(props: EnterAnswerProps) {
   const { options, explanation, answer, showAnswer } = props;
   const {
     control,
@@ -24,12 +31,12 @@ export default function EnterAnswer(props) {
   } = useForm();
   const dispatch = useDispatch();
 
-  const onSubmit = (data) => {
+  const onSubmit = (data: { answer: string }) => {
     dispatch(submitQuestion(data));
   };
 
   useEffect(() => {
-    setValue("answer", answer.answer || "");
+    setValue("answer", answer || "");
   }, [answer, setValue]);
 
   const [show, setShow] = useState(true);
@@ -40,26 +47,24 @@ export default function EnterAnswer(props) {
   return (
     <Stack spacing={2} sx={{ padding: 3 }}>
       <Box className="form-input-answer">
-        <FormProvider onSubmit={handleSubmit(onSubmit)}>
-          <RHFTextField
-            className="AnswerInput"
-            fullWidth
-            placeholder="Đáp án trả lời ..."
-            name="answer"
-            control={control}
-            disabled={showAnswer}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <SVGIcon
-                    src="/arrow-right.svg"
-                    sx={{ color: "#007AFF", width: "20px", height: "20px" }}
-                  />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </FormProvider>
+      <RHFTextField
+  name="answer"
+  // control={control}
+  label="Đáp án trả lời ..."
+  fullWidth
+  disabled={showAnswer}
+  InputProps={{
+    endAdornment: (
+      <InputAdornment position="end">
+        <SVGIcon
+          src="/arrow-right.svg"
+          sx={{ color: "#007AFF", width: "20px", height: "20px" }}
+        />
+      </InputAdornment>
+    ),
+  }}
+/>
+
       </Box>
 
       {showAnswer && (
@@ -67,7 +72,7 @@ export default function EnterAnswer(props) {
           <Button className="answerOptionBtn correctOptionBtn" disabled={true}>
             <SVGIcon src="correct.svg" sx={{ width: "12px", height: "12px" }} />
           </Button>
-          {options.map((option) => option.option.option_text + " ")}
+          {options.map((option) => option.option_text + " ")}
           <Box className={`explanation ${showAnswer && "show-explanation"}`}>
             <Button
               variant="text"

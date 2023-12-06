@@ -1,23 +1,25 @@
-import SVGIcon from "@/components/SVGIcon";
+import SVGIcon from "components/SVGIcon";
 import {
   getAllTestAPI,
   selectError,
   selectIsLoading,
   selectTestList,
-} from "@/redux/slices/test";
+} from "redux/reducer/test";
 import { Box, Container, Grid, Typography } from "@mui/material";
 import Link from "next/link";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { ITest } from "types/test";
+import { AnyAction, ThunkDispatch } from "@reduxjs/toolkit";
 
-export default function Page(props) {
+export default function Page(props: any) {
   const dispatch = useDispatch();
   const testList = useSelector(selectTestList);
   const isLoading = useSelector(selectIsLoading);
   const error = useSelector(selectError);
 
   useEffect(() => {
-    dispatch(getAllTestAPI());
+    (dispatch as ThunkDispatch<any, void, AnyAction>)(getAllTestAPI())
   }, [dispatch]);
 
   return (

@@ -16,8 +16,6 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   changeTab,
   chooseQuestion,
-  createNewUserResultAPI,
-  getUserResultAPI,
   selectCurrentQuestion,
   selectError,
   selectIsLoading,
@@ -27,25 +25,19 @@ import {
   selectType,
   selectUserAnswer,
   startGame,
-} from "@/redux/slices/question";
-import ConfirmSubmitModal from "@/components/question/confirmSubmitModal";
-import DrawerRanking from "@/components/question/drawerRanking";
-import {
-  closeDrawer,
-  getUsersAPI,
-  openDrawer,
-  selectIsOpenDrawer,
-  selectUserList,
-} from "../../../redux/reducer/user";
-import Quizz from "@/components/question/quizz";
-import QuestionsBoard from "@/components/question/questionsBoard";
-import Review from "@/components/question/review";
-import Result from "@/components/question/result";
+} from "redux/reducer/question/question";
+import ConfirmSubmitModal from "components/question/confirmSubmitModal";
+import Quizz from "components/question/quizz";
+import QuestionsBoard from "components/question/questionsBoard";
+import Review from "components/question/review";
+import Result from "components/question/result";
 import { useRouter } from "next/router";
+import { AnyAction, ThunkDispatch } from "@reduxjs/toolkit";
+import { getUserResultAPI } from "redux/reducer/question/userResultAPI";
 
 const defaultTheme = createTheme();
 
-export default function Page(props) {
+export default function Page(props : any) {
   const dispatch = useDispatch();
   const { query } = useRouter();
   const { testId } = query;
@@ -59,12 +51,12 @@ export default function Page(props) {
   const score = useSelector(selectScore);
   const type = useSelector(selectType);
 
-  // const userList = useSelector(selectUserList);
-  // const isOpenDrawer = useSelector(selectIsOpenDrawer);
-
   useEffect(() => {
-    dispatch(getUserResultAPI({ testId, type }));
-  }, [dispatch]);
+    if (typeof testId === 'string' && type) {
+      (dispatch as ThunkDispatch<any, void, AnyAction>)(getUserResultAPI({ userId: "65641bc12971970f5e1918cc", testId, type }));
+    }
+  }, [dispatch, testId, type]);
+  
 
   if (isLoading) {
     return (
@@ -72,8 +64,7 @@ export default function Page(props) {
         disableGutters
         maxWidth="md"
         component="main"
-        align="center"
-        sx={{ pt: 8, pb: 6 }}
+        sx={{ pt: 8, pb: 6, textAlign: 'center' }} 
       >
         <CircularProgress />
       </Container>
@@ -84,31 +75,23 @@ export default function Page(props) {
     dispatch(startGame());
   };
 
-  const handleCloseDrawer = () => {
-    dispatch(closeDrawer());
-  };
-
-  const onClickRanking = () => {
-    dispatch(openDrawer());
-  };
-
   const onClickNextBtn = () => {
-    dispatch(chooseQuestion(currentQuestion + 1));
+    if (typeof currentQuestion === 'number') {
+      dispatch(chooseQuestion(currentQuestion + 1));
+    }
   };
-
+  
   const onClickPreBtn = () => {
-    dispatch(chooseQuestion(currentQuestion - 1));
+    if (typeof currentQuestion === 'number') {
+      dispatch(chooseQuestion(currentQuestion - 1));
+    }
   };
+  
 
-  const onChangeTab = (event, type) => {
+  const onChangeTab = (event: any, type: "practice" | "test") => {
     dispatch(changeTab({ testId, type }));
-    dispatch(getUserResultAPI({ testId, type }));
-  };
-
-  const onClickTryAgain = () => {
-    console.log("onclick");
-    dispatch(createNewUserResultAPI({ testId, type }));
-    dispatch(startGame());
+    if (typeof testId === 'string' && type)
+      (dispatch as ThunkDispatch<any, void, AnyAction>)(getUserResultAPI({ userId: "65641bc12971970f5e1918cc", testId, type }));
   };
 
   return (
@@ -129,17 +112,19 @@ export default function Page(props) {
         </Tabs>
         <Grid container spacing={2} mt={4}>
           <Grid item xs={6} md={3}>
+            {userAnswer &&
             <QuestionsBoard
               userAnswer={userAnswer}
               currentQuestion={currentQuestion}
               isSubmitted={isSubmitted}
               type={type}
             />
+            }
           </Grid>
 
           <Grid item xs={6} md={9}>
             <Stack spacing={2}>
-              {(isSubmitted && currentQuestion == null && (
+              {(isSubmitted && currentQuestion && userAnswer && typeof testId === 'string'  && (
                 <Result userAnswer={userAnswer} testId={testId} type={type} />
               )) ||
                 (!isSubmitted && currentQuestion == null && (
@@ -160,17 +145,16 @@ export default function Page(props) {
                     </Button>
                   </Box>
                 )) ||
-                (currentQuestion != null && (
+                (currentQuestion && userAnswer && (
                   <Quizz
                     currentQuestion={currentQuestion}
                     userAnswer={userAnswer}
-                    isSubmitted={isSubmitted}
                     onClickNextBtn={onClickNextBtn}
                     onClickPreBtn={onClickPreBtn}
                     type={type}
                   />
                 ))}
-              {isSubmitted && <Review userAnswer={userAnswer} />}
+              {isSubmitted && userAnswer && <Review userAnswer={userAnswer} type={type} />}
             </Stack>
           </Grid>
         </Grid>

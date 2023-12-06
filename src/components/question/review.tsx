@@ -1,10 +1,16 @@
 import { Box, Typography } from "@mui/material";
 import Options from "./options";
+import { Answer } from "types/question";
 
-export default function Review(props) {
-  const { userAnswer } = props;
+interface ReviewProps {
+  userAnswer: Answer[], 
+  type: "practice" | "test"
+}
 
-  if (userAnswer == []) return;
+export default function Review(props: ReviewProps) {
+  const { userAnswer, type } = props;
+
+
 
   return (
     <Box sx={{ background: "#F8F8FA", padding: "30px", borderRadius: "15px" }}>
@@ -18,6 +24,7 @@ export default function Review(props) {
             explanation={answer.question.explanation}
             showAnswer={answer.showAnswer}
             question_type={answer.question.question_type}
+            type={type}
           />
         </Box>
       ))}

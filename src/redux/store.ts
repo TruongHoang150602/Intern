@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import testReducer from "./reducer/test";
-import questionReducer from "./reducer/question/questionReducer";
+import questionReducer from "./reducer/question/question";
 import blogReducer from "./reducer/blog";
 import userReducer from "./reducer/user";
 

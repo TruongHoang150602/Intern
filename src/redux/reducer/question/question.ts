@@ -44,7 +44,7 @@ const questionSlice = createSlice({
       state.currentQuestion = 0;
     },
 
-    restartGame(state, action) {
+    restartGame(state) {
       if (
         state.type == "practice" &&
         state.userAnswer != null &&
@@ -124,7 +124,7 @@ const questionSlice = createSlice({
       state.currentQuestion = null;
     },
 
-    submit(state, action) {
+    submit(state) {
       if (state.userAnswer && state.id) {
         state.isSubmitted = true;
         state.isOpenModal = false;
@@ -158,7 +158,7 @@ const questionSlice = createSlice({
       }
     },
 
-    openModal(state, action) {
+    openModal(state) {
       state.isOpenModal = true;
     },
     closeModal(state) {

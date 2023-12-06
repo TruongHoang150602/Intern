@@ -2,18 +2,25 @@ import {
   chooseQuestion,
   openModal,
   restartGame,
-  startGame,
-  submit,
-} from "@/redux/slices/question";
+} from "redux/reducer/question/question";
 import { Box, Button, Grid, Typography } from "@mui/material";
 import ReplayIcon from "@mui/icons-material/Replay";
 import { useDispatch } from "react-redux";
+import { Answer } from "types/question";
+import { checkCorrect } from "utils/question";
 
-export default function QuestionsBoard(props) {
+interface QuestionsBoardProps {
+  userAnswer: Answer[], 
+  currentQuestion: number | null, 
+  isSubmitted: boolean, 
+  type: string
+}
+
+export default function QuestionsBoard(props: QuestionsBoardProps) {
   const { userAnswer, currentQuestion, isSubmitted, type } = props; // Fix typo in variable name
   const dispatch = useDispatch();
 
-  const onClickQuestion = (index) => {
+  const onClickQuestion = (index: number) => {
     dispatch(chooseQuestion(index));
   };
 
@@ -25,22 +32,8 @@ export default function QuestionsBoard(props) {
     dispatch(restartGame());
   };
 
-  const checkCorrect = (answer) => {
-    if (answer.question.question_type == "input") {
-      if (!answer.answer) return false;
-      return (
-        answer.options[0].option.option_text.toLowerCase() ==
-        answer.answer.toLowerCase()
-      );
-    }
+  
 
-    return answer.options.every((option) => {
-      return (
-        (option.isSelected && option.option.is_correct) ||
-        (!option.isSelected && !option.option.is_correct)
-      );
-    });
-  };
   return (
     <Box
       sx={{
@@ -81,7 +74,7 @@ export default function QuestionsBoard(props) {
                   (answer.showAnswer &&
                     ((checkCorrect(answer) && "correctOptionBtn") ||
                       (!checkCorrect(answer) && "wrongOptionBtn"))) ||
-                  (type == "test" && answer.length > 0 && "choosenQuestionBtn")
+                  (type == "test" && answer.answer && "choosenQuestionBtn")
                 }`}
                 onClick={() => {
                   onClickQuestion(index);

@@ -1,31 +1,27 @@
 // slices/testSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axios, { AxiosResponse } from "axios";
-import { RootState } from "../store"; 
+import { RootState } from "../store";
 import { DELETE, GET, PUT, RequestData } from "../../utils/url"; // Thay đổi đường dẫn tùy thuộc vào vị trí của file http-utils
 import APIConfig from "utils/APIConfig";
 import { ITest } from "types/test";
 
-export const getAllTestAPI = createAsyncThunk<ITest[], void>(
-  "test/getTests",
-  async () => {
-    try {
-      const requestData: RequestData = {
-        url: APIConfig.GET_ALL_TESTS,
-      };
-      const response = await GET(requestData);
-      return response;
-    } catch (error) {
-      throw new Error("Failed to fetch test data from API");
-    }
+export const getAllTestAPI = createAsyncThunk("test/getTests", async () => {
+  try {
+    const requestData: RequestData = {
+      url: APIConfig.GET_ALL_TESTS,
+    };
+    const response = await GET(requestData);
+    return response;
+  } catch (error) {
+    throw new Error("Failed to fetch test data from API");
   }
-);
+});
 
-export const updateTestAPI = createAsyncThunk<ITest, { testId: string; name: string }>(
+export const updateTestAPI = createAsyncThunk(
   "test/updateTest",
-  async (payload) => {
+  async ({ testId, name }: { testId: string; name: string }) => {
     try {
-      const { testId, name } = payload;
       const requestData: RequestData = {
         url: APIConfig.UPDATE_TEST.replace(":testId", testId),
         params: { name },
@@ -38,9 +34,9 @@ export const updateTestAPI = createAsyncThunk<ITest, { testId: string; name: str
   }
 );
 
-export const deleteTestAPI = createAsyncThunk<void, string>(
+export const deleteTestAPI = createAsyncThunk(
   "test/deleteTest",
-  async (testId) => {
+  async ({ testId }: { testId: string }) => {
     try {
       const requestData: RequestData = {
         url: APIConfig.DELETE_TEST.replace(":testId", testId),
@@ -51,7 +47,6 @@ export const deleteTestAPI = createAsyncThunk<void, string>(
     }
   }
 );
-
 
 interface TestState {
   testList: ITest[];

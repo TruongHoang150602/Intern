@@ -1,6 +1,10 @@
 import { Container, Typography } from "@mui/material";
 
-export default function Question(props) {
+interface QuestionProps {
+  question: string
+}
+
+export default function Question(props: QuestionProps) {
   const { question } = props;
   return (
     <Typography
