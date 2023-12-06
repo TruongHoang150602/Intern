@@ -4,7 +4,7 @@
   },
   "include": [
     "src/**/*"
-, "src/components", "helpper"  ],
+, "src/components", "src/helpper"  ],
   "exclude": [
     "node_modules",
     "**/node_modules/*"
